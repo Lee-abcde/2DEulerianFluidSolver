@@ -139,23 +139,12 @@ def mouse_interaction(prev_posx:int,prev_posy:int):
         prev_posx = mousePos_x
         prev_posy = mousePos_y
     mouseRadius = eulerSimParam['mouse_radius'] * min(eulerSimParam['shape'][0],eulerSimParam['shape'][1])
-    # mouse_adddpf(mousePos_x,mousePos_y,mouseRadius,pressure_pair.cur,pressure_pair.nxt)
-    # pressure_pair.swap()
 
     mouse_addspeed(mousePos_x,mousePos_y,prev_posx,prev_posy,mouseRadius,velocities_pair.cur,velocities_pair.nxt)
     velocities_pair.swap()
     prev_posx = mousePos_x
     prev_posy = mousePos_y
     return prev_posx,prev_posy
-
-@ti.kernel
-def mouse_adddpf(mouse_posx:int,mouse_posy:int,mouseRadius:float,pf:ti.template(),new_pf:ti.template()):
-    for i,j in pf:
-        dis = ti.Vector([mouse_posx-i,mouse_posy-j])
-        if tm.length(dis) < mouseRadius:
-            new_pf[i,j] = pf[i,j] + eulerSimParam['mouse_pressure']
-
-
 
 @ti.kernel
 def mouse_addspeed(cur_posx:int,cur_posy:int,prev_posx:int,prev_posy:int,mouseRadius:float,vf:ti.template(),new_vf:ti.template()):
