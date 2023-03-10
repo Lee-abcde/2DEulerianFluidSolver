@@ -40,3 +40,7 @@ eulerSimParam = {
 
 部分实现参考[Taichi_HW1_EulerianFluid](https://github.com/JerryYan97/Taichi_HW1_EulerianFluid) by [@JerryYan97](https://github.com/JerryYan97)
 
+## To do list
+
+* 修复底部有部分黑色的渗漏问题
+

@@ -9,9 +9,10 @@ eulerSimParam = {
     'load_image':'img/test2.jpg',
     'shape': [512, 512],
     'dt': 1 / 60.,
-    'iteration_step': 50,
+    'iteration_step': 20,
     'mouse_radius':0.01,# [0.0,1.0] float
-    'mouse_speed': 100.,
+    'mouse_speed': 125.,
+    'mouse_respondDistance':0.5, # for every frame, only half the trace of the mouse will influence water
     'curl_param':15
 }
 
@@ -87,14 +88,12 @@ def pressure_projection(pf: ti.template(), vf: ti.template(), vf_new: ti.templat
         vf_new[i, j] = vf[i, j] - ti.Vector([(p_with_boundary(pf, i + 1, j,eulerSimParam['shape']) - p_with_boundary(pf, i - 1, j, eulerSimParam['shape'])) / 2.0,
                                              (p_with_boundary(pf, i, j + 1,eulerSimParam['shape']) - p_with_boundary(pf, i, j - 1, eulerSimParam['shape'])) / 2.0])
 
-
 # Boundry Condition
 @ti.func
 def vel_with_boundary(vf: ti.template(), i: int, j: int, shape) -> ti.f32:
     if (i <= 0) or (i >= shape[0] - 1) or (j >= shape[1] - 1) or ( j <= 0):
         vf[i, j] = ti.Vector([0.0, 0.0])
     return vf[i, j]
-
 
 @ti.func
 def p_with_boundary(pf: ti.template(), i: int, j: int, shape) -> ti.f32:
@@ -113,7 +112,7 @@ def p_with_boundary(pf: ti.template(), i: int, j: int, shape) -> ti.f32:
 
 @ti.func
 def c_with_boundary(cf: ti.template(), i: int, j: int, shape) -> ti.f32:
-    if (i <= 0) or (i >= shape[0] - 1) or (j >= shape[1] - 1) or ( j <= 0):
+    if (i <= 0) or (i >= shape[0] - 1) or (j >= shape[1] - 1) or (j <= 0):
         cf[i, j] = 0.0
     return cf[i, j]
 
@@ -154,7 +153,7 @@ def mouse_addspeed(cur_posx:int,cur_posy:int,prev_posx:int,prev_posy:int,mouseRa
         vec2 = ti.Vector([i-prev_posx,j-prev_posy])
         dotans = tm.dot(vec1,vec2)
         distance = abs(tm.cross(vec1,vec2)) / (tm.length(vec1)+0.001)
-        if dotans >= 0 and dotans <= tm.length(vec1) and distance <= mouseRadius:
+        if dotans >= 0 and dotans <= eulerSimParam['mouse_respondDistance'] * tm.length(vec1) and distance <= mouseRadius:
             new_vf[i,j] = vf[i,j] + vec1 * eulerSimParam['mouse_speed']
         else:
             new_vf[i,j] = vf[i,j]
