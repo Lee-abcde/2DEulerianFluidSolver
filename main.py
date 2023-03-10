@@ -6,7 +6,7 @@ import matplotlib.image as mpimg
 ti.init(arch=ti.gpu)
 
 eulerSimParam = {
-    'load_image':'./test1.jpg',
+    'load_image':'img/test1.jpg',
     'shape': [1200, 1200],
     'dt': 1 / 60.,
     'iteration_step': 50,
