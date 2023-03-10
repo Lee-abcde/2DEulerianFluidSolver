@@ -6,14 +6,15 @@ import matplotlib.image as mpimg
 ti.init(arch=ti.gpu)
 
 eulerSimParam = {
-    'load_image':'img/test1.jpg',
-    'shape': [1200, 1200],
+    'load_image':'img/test2.jpg',
+    'shape': [512, 512],
     'dt': 1 / 60.,
     'iteration_step': 50,
     'mouse_radius':0.01,# [0.0,1.0] float
-    'mouse_pressure': 50.,
+    'mouse_speed': 100.,
     'curl_param':15
 }
+
 velocityField = ti.Vector.field(2, float, shape=(eulerSimParam['shape']))
 _new_velocityField = ti.Vector.field(2, float, shape=(eulerSimParam['shape']))
 colorField = ti.Vector.field(3, float, shape=(eulerSimParam['shape']))
@@ -154,10 +155,9 @@ def mouse_addspeed(cur_posx:int,cur_posy:int,prev_posx:int,prev_posy:int,mouseRa
         dotans = tm.dot(vec1,vec2)
         distance = abs(tm.cross(vec1,vec2)) / (tm.length(vec1)+0.001)
         if dotans >= 0 and dotans <= tm.length(vec1) and distance <= mouseRadius:
-            new_vf[i,j] = vf[i,j] + vec1 * 100
+            new_vf[i,j] = vf[i,j] + vec1 * eulerSimParam['mouse_speed']
         else:
             new_vf[i,j] = vf[i,j]
-
 
 def advaction_step():
     advection(velocities_pair.cur, color_pair.cur, color_pair.nxt)
