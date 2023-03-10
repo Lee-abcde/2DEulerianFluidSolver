@@ -6,6 +6,8 @@ A interactive demo of 2D Eulerian Fluid Solver based on Taichi Lang
 - 能够与鼠标进行交互
 - 代码简短清晰，方便学习
 
+![仿真效果](https://github.com/Lee-abcde/2DEulerianFluidSolver/blob/dev/img/cover.png)
+
 ### 依赖包安装
 
 ```
