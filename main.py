@@ -29,7 +29,6 @@ velocities_pair = Util.TexPair(velocityField, _new_velocityField)
 pressure_pair = Util.TexPair(pressField, _new_pressField)
 color_pair = Util.TexPair(colorField, _new_colorField)
 
-
 @ti.kernel
 def init_field(scr: ti.types.ndarray()):
     # init pressure and velocity fieldfield
@@ -53,42 +52,27 @@ def advection(vf: ti.template(), qf: ti.template(), new_qf: ti.template()):
 @ti.kernel
 def curl(vf: ti.template(), cf: ti.template()):
     for i,j in vf:
-        # cf[i,j] = 0.5 * ((vel_with_boundary(vf,i+1,j,eulerSimParam['shape'])[1] - vel_with_boundary(vf,i-1,j,eulerSimParam['shape'])[1]) - (vel_with_boundary(vf,i,j+1,eulerSimParam['shape'])[0] - vel_with_boundary(vf,i,j-1,eulerSimParam['shape'])[0]))
         cf[i,j] = 0.5 * ((vf[i+1,j][1] - vf[i-1,j][1]) - (vf[i,j+1][0] - vf[i,j-1][0]))
 
 @ti.kernel
-def vorticity_projection(cf:ti.template(), vf: ti.template(), vf_new: ti.template()):
-    for i,j in cf:
-        # gradcurl = ti.Vector([0.5 * (c_with_boundary(cf, i+1, j, eulerSimParam['shape'])-c_with_boundary(cf, i-1, j, eulerSimParam['shape'])),
-        #                       0.5 * (c_with_boundary(cf, i, j+1, eulerSimParam['shape'])-c_with_boundary(cf, i, j-1, eulerSimParam['shape'])), 0])
-        gradcurl = ti.Vector([0.5 * (cf[i+1, j]-cf[i-1, j]),
-                              0.5 * (cf[i, j+1]-cf[i, j-1]), 0])
-        # if i == 0:
-        #     print(cf[i+1, j],cf[i-1, j])
+def vorticity_projection(cf: ti.template(), vf: ti.template(), vf_new: ti.template()):
+    for i, j in cf:
+        gradcurl = ti.Vector([0.5 * (cf[i + 1, j] - cf[i - 1, j]),
+                              0.5 * (cf[i, j + 1] - cf[i, j - 1]), 0])
         GradCurlLength = tm.length(gradcurl)
         if (GradCurlLength > 1e-5):
-            force = eulerSimParam['curl_param'] * tm.cross(gradcurl/GradCurlLength, ti.Vector([0 , 0 , 1]))
+            force = eulerSimParam['curl_param'] * tm.cross(gradcurl / GradCurlLength, ti.Vector([0, 0, 1]))
             vf_new[i, j] = vf[i, j] + eulerSimParam['dt'] * force[:2]
-
 
 @ti.kernel
 def divergence(vf: ti.template(), divf: ti.template()):
     for i, j in vf:
         divf[i, j] = 0.5 * (vf[i + 1, j][0] - vf[i - 1, j][0] + vf[i, j + 1][1] - vf[i, j - 1][1])
-        # divf[i, j] = 0.5 * (vel_with_boundary(vf,i+1,j,eulerSimParam['shape'])[0] - vel_with_boundary(vf,i-1,j,eulerSimParam['shape'])[0]
-        #                   + vel_with_boundary(vf,i,j+1,eulerSimParam['shape'])[1] - vel_with_boundary(vf,i,j-1,eulerSimParam['shape'])[1])
-
 
 @ti.kernel
 def pressure_iteration(divf: ti.template(), pf: ti.template(), new_pf: ti.template()):
     for i, j in pf:
         new_pf[i, j] = (pf[i + 1, j] + pf[i - 1, j] + pf[i, j - 1] + pf[i, j + 1] - divf[i, j]) / 4
-        # new_pf[i, j] = (p_with_boundary(pf, i + 1, j, eulerSimParam['shape'])
-        #                 + p_with_boundary(pf, i - 1, j,eulerSimParam['shape'])
-        #                 + p_with_boundary(pf, i, j - 1, eulerSimParam['shape'])
-        #                 + p_with_boundary(pf, i, j + 1,eulerSimParam['shape'])
-        #                 - divf[i, j]) / 4
-
 
 def pressure_solve(presspair: Util.TexPair, divf: ti.template()):
     for i in range(eulerSimParam['iteration_step']):
@@ -96,11 +80,9 @@ def pressure_solve(presspair: Util.TexPair, divf: ti.template()):
         presspair.swap()
         apply_p_bc(presspair.cur)
 
-
 @ti.kernel
 def pressure_projection(pf: ti.template(), vf: ti.template(), vf_new: ti.template()):
     for i, j in vf:
-        # vf_new[i, j] = vf[i, j] + ti.Vector([(pf[i + 1, j] - pf[i - 1, j]) / 2.0, (pf[i, j + 1] - pf[i, j - 1]) / 2.0])
         vf_new[i, j] = vf[i, j] - ti.Vector([(p_with_boundary(pf, i + 1, j,eulerSimParam['shape']) - p_with_boundary(pf, i - 1, j, eulerSimParam['shape'])) / 2.0,
                                              (p_with_boundary(pf, i, j + 1,eulerSimParam['shape']) - p_with_boundary(pf, i, j - 1, eulerSimParam['shape'])) / 2.0])
 
@@ -108,17 +90,6 @@ def pressure_projection(pf: ti.template(), vf: ti.template(), vf_new: ti.templat
 # Boundry Condition
 @ti.func
 def vel_with_boundary(vf: ti.template(), i: int, j: int, shape) -> ti.f32:
-    # if (i == j == 0) or (i == shape[0] - 1 and j == shape[1] - 1) or (i == 0 and j == shape[1] - 1) or (
-    #         i == shape[0] - 1 and j == 0):
-    #     vf[i, j] = ti.Vector([0.0, 0.0])
-    # elif i == 0:
-    #     vf[i, j] = -vf[1, j]
-    # elif j == 0:
-    #     vf[i, 0] = -vf[i, 1]
-    # elif i == shape[0] - 1:
-    #     vf[shape[0] - 1, j] = -vf[shape[0] - 2, j]
-    # elif j == shape[1] - 1:
-    #     vf[i, shape[1] - 1] = -vf[i, shape[1] - 2]
     if (i <= 0) or (i >= shape[0] - 1) or (j >= shape[1] - 1) or ( j <= 0):
         vf[i, j] = ti.Vector([0.0, 0.0])
     return vf[i, j]
@@ -141,17 +112,6 @@ def p_with_boundary(pf: ti.template(), i: int, j: int, shape) -> ti.f32:
 
 @ti.func
 def c_with_boundary(cf: ti.template(), i: int, j: int, shape) -> ti.f32:
-    # if (i == j == 0) or (i == shape[0] - 1 and j == shape[1] - 1) or (i == 0 and j == shape[1] - 1) or (
-    #         i == shape[0] - 1 and j == 0):
-    #     cf[i, j] = 0.0
-    # elif i == 0:
-    #     cf[0, j] = cf[1, j]
-    # elif j == 0:
-    #     cf[i, 0] = cf[i, 1]
-    # elif i == shape[0] - 1:
-    #     cf[shape[0] - 1, j] = cf[shape[0] - 2, j]
-    # elif j == shape[1] - 1:
-    #     cf[i, shape[1] - 1] = cf[i, shape[1] - 2]
     if (i <= 0) or (i >= shape[0] - 1) or (j >= shape[1] - 1) or ( j <= 0):
         cf[i, j] = 0.0
     return cf[i, j]
