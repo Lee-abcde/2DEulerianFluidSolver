@@ -6,7 +6,7 @@ A interactive demo of 2D Eulerian Fluid Solver based on Taichi Lang
 - 水面能够与鼠标进行交互
 - 添加旋度运算，更好的流体表现 ：）
 - 支持切换流体的背景图片（图片位于img目录下方）
-- 代码简短清晰，方便学习
+- 代码简短清晰（200 lines)，方便阅读
 
 ![仿真效果](https://github.com/Lee-abcde/2DEulerianFluidSolver/blob/dev/img/cover.png)
 
