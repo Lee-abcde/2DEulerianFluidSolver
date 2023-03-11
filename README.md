@@ -18,7 +18,7 @@ conda install taichi
 conda install matplotlib
 ```
 
-安装以上两个包之后，运行`main.py`即可以和demo玩耍
+安装以上两个包之后，运行`main.py`即可以和demo玩耍（如果提示读入图片报错，请参照下文**切换流体初始图片**进行参考修改相对路径）
 
 ### 代码阅读指北
 
@@ -30,12 +30,13 @@ conda install matplotlib
 
 ```
 eulerSimParam = {
-    'load_image':'img/test1.jpg',
-    'shape': [1200, 1200],
+    'load_image':'../img/test2.jpg',
+    'shape': [512, 512],
     'dt': 1 / 60.,
-    'iteration_step': 50,
+    'iteration_step': 20,
     'mouse_radius':0.01,# [0.0,1.0] float
-    'mouse_pressure': 50.,
+    'mouse_speed': 125.,
+    'mouse_respondDistance':0.5, # for every frame, only half the trace of the mouse will influence water
     'curl_param':15
 }
 ```

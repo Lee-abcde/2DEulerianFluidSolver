@@ -39,8 +39,8 @@ def init_field(scr: ti.types.ndarray()):
     for i, j in ti.ndrange(eulerSimParam['shape'][0], eulerSimParam['shape'][1]):
         # init color field
         colorField[i, j] = (
-            scr[eulerSimParam['shape'][1] - j, i, 0] / 255., scr[eulerSimParam['shape'][1] - j, i, 1] / 255.,
-            scr[eulerSimParam['shape'][1] - j, i, 2] / 255.)
+            scr[eulerSimParam['shape'][1] - j - 1, i, 0] / 255., scr[eulerSimParam['shape'][1] - j - 1, i, 1] / 255.,
+            scr[eulerSimParam['shape'][1] - j - 1, i, 2] / 255.)
 
 @ti.kernel
 def advection(vf: ti.template(), qf: ti.template(), new_qf: ti.template()):
