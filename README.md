@@ -13,7 +13,11 @@ A interactive demo of 2D Eulerian Fluid Solver based on Taichi Lang
 ### Demo依赖包安装
 
 ```
-python version = 3.9.16
+python version == 3.9.16
+taichi == 1.4.1
+```
+
+```
 conda install taichi
 conda install matplotlib
 ```
