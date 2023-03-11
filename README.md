@@ -20,6 +20,12 @@ conda install matplotlib
 
 安装以上两个包之后，运行`main.py`即可以和demo玩耍
 
+### 代码阅读指北
+
+`main.py`：流体求解器主要代码，建议先看最后的循环部分。
+
+`Util.py`：双Buffer类和双线性差值函数的实现
+
 ### 如何切换流体初始图片
 
 ```
