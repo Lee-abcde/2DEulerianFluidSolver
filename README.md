@@ -5,7 +5,7 @@ A interactive demo of 2D Eulerian Fluid Solver based on Taichi Lang
 
 - 水面能够与鼠标进行交互
 - 添加旋度运算，更好的流体表现 ：）
-- 自定义流体颜色场为背景图片，测试图片位于img目录下方（该功能默认不启用，默认用代码初始化太极图片，开启方法见下）
+- 自定义流体颜色场为背景图片，测试图片位于img目录下方（该功能默认不启用，默认用代码初始化太极图片，开启方法见下文）
 - 代码简短清晰（200 lines)，方便阅读
 
 ![仿真效果](https://github.com/Lee-abcde/2DEulerianFluidSolver/blob/dev/img/Cover.gif)
@@ -49,7 +49,7 @@ eulerSimParam = {
 修改代码中以下参数：
 
 * `use_image`为`True` （如果该参数为`False`代码默认生成太极图像）
-* `load_image`为图片位置
+* `load_image`为你希望初始化的流体的图片位置（默认为image下的一张图像）
 * 修改`shape`为所需图片的大小
 
 ### 致谢
