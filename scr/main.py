@@ -6,6 +6,7 @@ import matplotlib.image as mpimg
 ti.init(arch=ti.gpu)
 
 eulerSimParam = {
+    'use_image': False,
     'load_image':'../img/test2.jpg',
     'shape': [512, 512],
     'dt': 1 / 60.,
@@ -31,17 +32,24 @@ velocities_pair = Util.TexPair(velocityField, _new_velocityField)
 pressure_pair = Util.TexPair(pressField, _new_pressField)
 color_pair = Util.TexPair(colorField, _new_colorField)
 
-@ti.kernel
-def init_field(scr: ti.types.ndarray()):
+# @ti.kernel
+def init_field():
     # init pressure and velocity fieldfield
     pressField.fill(0)
     velocityField.fill(0)
+    if eulerSimParam['use_image']:
+        I = mpimg.imread(eulerSimParam['load_image'])
+        init_field_withpic(I,colorField)
+    else:
+        Util.paint(eulerSimParam['shape'][0],eulerSimParam['shape'][1], colorField)
+
+@ti.kernel
+def init_field_withpic(scr: ti.types.ndarray(),field:ti.template()):
+    # init color field
     for i, j in ti.ndrange(eulerSimParam['shape'][0], eulerSimParam['shape'][1]):
-        # init color field
-        colorField[i, j] = (
+        field[i, j] = (
             scr[eulerSimParam['shape'][1] - j - 1, i, 0] / 255., scr[eulerSimParam['shape'][1] - j - 1, i, 1] / 255.,
             scr[eulerSimParam['shape'][1] - j - 1, i, 2] / 255.)
-
 @ti.kernel
 def advection(vf: ti.template(), qf: ti.template(), new_qf: ti.template()):
     for i, j in vf:
@@ -180,8 +188,7 @@ def pressure_step():
     apply_vel_bc(velocities_pair.cur)
 
 # The Euler Solver starts!
-I = mpimg.imread(eulerSimParam['load_image'])
-init_field(I)
+init_field()
 apply_vel_bc(velocities_pair.cur)
 window = ti.GUI("Euler 2D Simulation", res=(eulerSimParam['shape'][0], eulerSimParam['shape'][1]))
 

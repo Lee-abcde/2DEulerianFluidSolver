@@ -1,6 +1,8 @@
 import taichi as ti
 
-
+#####################
+#   Double Buffer
+#####################
 class TexPair:
     def __init__(self, cur, nxt):
         self.cur = cur
@@ -9,7 +11,9 @@ class TexPair:
     def swap(self):
         self.cur, self.nxt = self.nxt, self.cur
 
-
+#####################
+#   Bilerp fuction
+#####################
 @ti.func
 def sample(vf, u, v, shape):
     i, j = int(u), int(v)
@@ -37,3 +41,53 @@ def bilerp(vf, u, v, shape):
     # fract
     fu, fv = s - iu, t - iv
     return lerp(lerp(a, b, fu), lerp(c, d, fu), fv)
+
+#####################
+#   Taichi Logo fuction
+#####################
+@ti.func
+def Vector2(x, y):
+  return ti.Vector([x, y])
+
+
+@ti.func
+def inside(p, c, r):
+  return (p - c).norm_sqr() <= r * r
+
+
+@ti.func
+def inside_taichi(p_):
+  p = p_
+  p = Vector2(0.5, 0.5) + (p - Vector2(0.5, 0.5)) * 1.11
+  ret = -1
+  if not inside(p, Vector2(0.50, 0.50), 0.55):
+    if ret == -1:
+      ret = 0
+  if not inside(p, Vector2(0.50, 0.50), 0.50):
+    if ret == -1:
+      ret = 1
+  if inside(p, Vector2(0.50, 0.25), 0.09):
+    if ret == -1:
+      ret = 1
+  if inside(p, Vector2(0.50, 0.75), 0.09):
+    if ret == -1:
+      ret = 0
+  if inside(p, Vector2(0.50, 0.25), 0.25):
+    if ret == -1:
+      ret = 0
+  if inside(p, Vector2(0.50, 0.75), 0.25):
+    if ret == -1:
+      ret = 1
+  if p[0] < 0.5:
+    if ret == -1:
+      ret = 1
+  else:
+    if ret == -1:
+      ret = 0
+  return ret
+
+@ti.kernel
+def paint(n_x:int,n_y:int,x:ti.template()):
+  for i, j in ti.ndrange(n_x * 4, n_y * 4):
+      ret = 1.0 - inside_taichi(Vector2(1.0 * i / n_x / 4, 1.0 * j / n_y / 4))
+      x[i // 4, j // 4] += ret / 16
