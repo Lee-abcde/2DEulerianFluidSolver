@@ -1,5 +1,5 @@
 import taichi as ti
-
+import taichi.math as tm
 #####################
 #   Double Buffer
 #####################
@@ -46,11 +46,6 @@ def bilerp(vf, u, v, shape):
 #   Taichi Logo fuction
 #####################
 @ti.func
-def Vector2(x, y):
-  return ti.Vector([x, y])
-
-
-@ti.func
 def inside(p, c, r):
   return (p - c).norm_sqr() <= r * r
 
@@ -58,24 +53,24 @@ def inside(p, c, r):
 @ti.func
 def inside_taichi(p_):
   p = p_
-  p = Vector2(0.5, 0.5) + (p - Vector2(0.5, 0.5)) * 1.11
+  p = tm.vec2(0.5, 0.5) + (p - tm.vec2(0.5, 0.5)) * 1.11
   ret = -1
-  if not inside(p, Vector2(0.50, 0.50), 0.55):
+  if not inside(p, tm.vec2(0.50, 0.50), 0.55):
     if ret == -1:
       ret = 0
-  if not inside(p, Vector2(0.50, 0.50), 0.50):
+  if not inside(p, tm.vec2(0.50, 0.50), 0.50):
     if ret == -1:
       ret = 1
-  if inside(p, Vector2(0.50, 0.25), 0.09):
+  if inside(p, tm.vec2(0.50, 0.25), 0.09):
     if ret == -1:
       ret = 1
-  if inside(p, Vector2(0.50, 0.75), 0.09):
+  if inside(p, tm.vec2(0.50, 0.75), 0.09):
     if ret == -1:
       ret = 0
-  if inside(p, Vector2(0.50, 0.25), 0.25):
+  if inside(p, tm.vec2(0.50, 0.25), 0.25):
     if ret == -1:
       ret = 0
-  if inside(p, Vector2(0.50, 0.75), 0.25):
+  if inside(p, tm.vec2(0.50, 0.75), 0.25):
     if ret == -1:
       ret = 1
   if p[0] < 0.5:
@@ -89,5 +84,5 @@ def inside_taichi(p_):
 @ti.kernel
 def paint(n_x:int,n_y:int,x:ti.template()):
   for i, j in ti.ndrange(n_x * 4, n_y * 4):
-      ret = 1.0 - inside_taichi(Vector2(1.0 * i / n_x / 4, 1.0 * j / n_y / 4))
+      ret = 1.0 - inside_taichi(tm.vec2(1.0 * i / n_x / 4, 1.0 * j / n_y / 4))
       x[i // 4, j // 4] += ret / 16
