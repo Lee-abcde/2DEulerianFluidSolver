@@ -14,7 +14,8 @@ eulerSimParam = {
     'mouse_radius':0.01,# [0.0,1.0] float
     'mouse_speed': 125.,
     'mouse_respondDistance':0.5, # for every frame, only half the trace of the mouse will influence water
-    'curl_param':15
+    'curl_param':15,
+    'GUI_type':'GUI' #fill 'GUI' or 'CGUI'
 }
 
 velocityField = ti.Vector.field(2, float, shape=(eulerSimParam['shape']))
@@ -190,7 +191,12 @@ def pressure_step():
 # The Euler Solver starts!
 init_field()
 apply_vel_bc(velocities_pair.cur)
-window = ti.GUI("Euler 2D Simulation", res=(eulerSimParam['shape'][0], eulerSimParam['shape'][1]))
+
+if eulerSimParam['GUI_type']=='GUI':
+    window = ti.GUI("Euler 2D Simulation", res=(eulerSimParam['shape'][0], eulerSimParam['shape'][1]))
+elif eulerSimParam['GUI_type']=='CGUI':
+    window = ti.ui.Window("Euler 2D Simulation", res = (eulerSimParam['shape'][0], eulerSimParam['shape'][1]))
+    canvas = window.get_canvas()
 
 mouse_prevposx, mouse_prevposy = 0, 0
 while window.running:
@@ -203,5 +209,8 @@ while window.running:
     # pressure iteration and projection
     pressure_step()
 
-    window.set_image(colorField)
+    if eulerSimParam['GUI_type'] == 'GUI':
+        window.set_image(colorField)
+    elif eulerSimParam['GUI_type'] == 'CGUI':
+        canvas.set_image(colorField)
     window.show()
